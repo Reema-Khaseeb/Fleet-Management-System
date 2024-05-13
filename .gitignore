@@ -1,0 +1,68 @@
+# Visual Studio files
+.vs/
+bin/
+obj/
+
+# Compiled files
+*.dll
+*.exe
+*.pdb
+
+# NuGet packages
+*.nupkg
+
+# User-specific files
+*.user
+*.user.props
+*.user.targets
+*.suo
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+*_i.c
+*_p.c
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.Publish.xml
+*.pubxml
+*.pubxml.*
+*.cache
+*.log
+*.vspscc
+*.vssscc
+*.xap
+*.user
+
+# Resharper
+_ReSharper*/
+*.ReSharper*
+*.resharper*
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# Roslyn cache directories
+*.ide/
+*.ipch/
+*.sln.docstates
