@@ -58,24 +58,28 @@ public class VehicleService
             }
             gvar.DicOfDic["Tags"]["STS"] = "0";  // Indicate failure
             gvar.DicOfDT["Vehicles"] = new DataTable();  // Ensure structure consistency
-                                                         // Consider logging the exception here
         }
         return gvar;
     }
 
-    public ResponseResult AddVehicle(GVAR gvar)
+    public GVAR AddVehicle(GVAR gvar)
     {
+        var gvarResponse = new GVAR();
+        gvarResponse.DicOfDic["Tags"] = new ConcurrentDictionary<string, string>();
+
         try
         {
             if (!gvar.DicOfDic.TryGetValue("Tags", out var vehicleDetails))
             {
-                return new ResponseResult(Success: false, Message: "Vehicle details are missing.");
+                gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+                return gvarResponse;
             }
 
             // Convert VehicleNumber to long since the database expects a bigint
             if (!long.TryParse(vehicleDetails["VehicleNumber"], out long vehicleNumber))
             {
-                return new ResponseResult(Success: false, Message: "VehicleNumber is invalid or not present.");
+                gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+                return gvarResponse;
             }
 
             string vehicleType = vehicleDetails["VehicleType"];
@@ -91,12 +95,13 @@ public class VehicleService
                 }
             }
 
-            return new ResponseResult(Success: true, Message: "Vehicle added successfully.");
+            gvarResponse.DicOfDic["Tags"]["STS"] = "1";
+            return gvarResponse;
         }
         catch (Exception ex)
         {
-            //_logger.LogError(ex, "Error adding vehicle.");
-            return new ResponseResult(Success: false, Message: $"Error adding vehicle: {ex.Message}");
+            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            return gvarResponse;
         }
     }
 
@@ -110,18 +115,14 @@ public class VehicleService
             if (!gvar.DicOfDic.TryGetValue("Tags", out var vehicleDetails))
             {
                 gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                //_logger.LogError("Tags not provided in the request.");
                 return gvarResponse;
             }
 
             if (!vehicleDetails.TryGetValue("VehicleID", out string vehicleIDString) || !long.TryParse(vehicleIDString, out long vehicleID))
             {
                 gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                //_logger.LogError("VehicleID is either not provided, is invalid, or could not be parsed as long.");
                 return gvarResponse;
             }
-
-            //_logger.LogInformation($"Attempting to delete vehicle with ID: {vehicleID}");
 
             using (var connection = _databaseConnection.GetConnection())
             {
@@ -133,20 +134,17 @@ public class VehicleService
                     if (rowsAffected == 0)
                     {
                         gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                        //_logger.LogWarning($"No vehicle found with ID: {vehicleID}");
                         return gvarResponse;
                     }
                 }
             }
 
             gvarResponse.DicOfDic["Tags"]["STS"] = "1";
-            //_logger.LogInformation($"Vehicle with ID: {vehicleID} deleted successfully.");
             return gvarResponse;
         }
         catch (Exception ex)
         {
             gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-            //_logger.LogError(ex, "Error while deleting vehicle.");
             return gvarResponse;
         }
     }
@@ -161,14 +159,12 @@ public class VehicleService
             if (!gvar.DicOfDic.TryGetValue("Tags", out var vehicleDetails))
             {
                 gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                //_logger.LogError("Vehicle details are missing.");
                 return gvarResponse;
             }
 
             if (!vehicleDetails.TryGetValue("VehicleID", out string vehicleIDString) || !long.TryParse(vehicleIDString, out long vehicleID))
             {
                 gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                //_logger.LogError("VehicleID is invalid or not present.");
                 return gvarResponse;
             }
 
@@ -187,7 +183,6 @@ public class VehicleService
                         if (count > 0)
                         {
                             gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                            //_logger.LogError("New VehicleNumber is not unique.");
                             return gvarResponse;
                         }
                     }
@@ -213,14 +208,12 @@ public class VehicleService
                 }
 
                 gvarResponse.DicOfDic["Tags"]["STS"] = "1";
-                //_logger.LogInformation($"Vehicle with ID: {vehicleID} updated successfully.");
                 return gvarResponse;
             }
         }
         catch (Exception ex)
         {
             gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-            //_logger.LogError(ex, "Error updating vehicle.");
             return gvarResponse;
         }
     }
