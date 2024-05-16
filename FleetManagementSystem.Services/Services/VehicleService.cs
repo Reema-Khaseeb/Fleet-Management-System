@@ -4,7 +4,7 @@ using Npgsql;
 using System.Collections.Concurrent;
 using System.Data;
 
-namespace FleetManagementSystem.Services.Services;
+namespace FleetManagementSystem.Services;
 
 public class VehicleService
 {
