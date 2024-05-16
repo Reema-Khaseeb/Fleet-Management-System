@@ -1,10 +1,10 @@
 ﻿using FleetManagementSystem.Db.Interfaces;
-using FleetManagementSystem.Services.Dtos;
+using FleetManagementSystem.Services.utils;
 using Npgsql;
 using System.Collections.Concurrent;
 using System.Data;
 
-namespace FleetManagementSystem.Services;
+namespace FleetManagementSystem.Services.Services;
 
 public class VehicleService
 {
@@ -15,7 +15,7 @@ public class VehicleService
         _databaseConnection = databaseConnection;
     }
 
-    public GVAR GetVehiclesGvar()
+    public GVAR GetVehicles()
     {
         var gvar = new GVAR();
         try
@@ -148,7 +148,6 @@ public class VehicleService
             return gvarResponse;
         }
     }
-
     public GVAR UpdateVehicle(GVAR gvar)
     {
         var gvarResponse = new GVAR();
@@ -172,38 +171,71 @@ public class VehicleService
             {
                 connection.Open();
 
-                // Check for unique VehicleNumber if provided and parse it
-                if (vehicleDetails.TryGetValue("VehicleNumber", out string newVehicleNumberString) && long.TryParse(newVehicleNumberString, out long newVehicleNumber))
+                // Check if the VehicleID exists
+                using (var checkCommand = new NpgsqlCommand("SELECT EXISTS (SELECT 1 FROM \"Vehicles\" WHERE \"VehicleID\" = @VehicleID)", connection))
                 {
-                    using (var checkCommand = new NpgsqlCommand("SELECT COUNT(*) FROM \"Vehicles\" WHERE \"VehicleNumber\" = @NewVehicleNumber AND \"VehicleID\" <> @VehicleID", connection))
+                    checkCommand.Parameters.AddWithValue("@VehicleID", vehicleID);
+                    bool exists = (bool)checkCommand.ExecuteScalar();
+                    if (!exists)
                     {
-                        checkCommand.Parameters.AddWithValue("@NewVehicleNumber", newVehicleNumber);
-                        checkCommand.Parameters.AddWithValue("@VehicleID", vehicleID);
-                        int count = Convert.ToInt32(checkCommand.ExecuteScalar());
-                        if (count > 0)
+                        gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+                        return gvarResponse;
+                    }
+                }
+
+                var updateParts = new List<string>();
+                var parameters = new Dictionary<string, object>();
+
+                // Process each field dynamically, excluding the primary key "VehicleID"
+                foreach (var detail in vehicleDetails)
+                {
+                    if (detail.Key != "VehicleID" && detail.Value != null)
+                    {
+                        string paramName = "@" + detail.Key;
+                        object value = detail.Value;
+
+                        // Handle type conversion for VehicleNumber and check for uniqueness
+                        if (detail.Key == "VehicleNumber" && long.TryParse(detail.Value, out long newVehicleNumber))
+                        {
+                            // Check for unique VehicleNumber if provided
+                            using (var checkCommand = new NpgsqlCommand("SELECT EXISTS (SELECT 1 FROM \"Vehicles\" WHERE \"VehicleNumber\" = @NewVehicleNumber AND \"VehicleID\" <> @VehicleID)", connection))
+                            {
+                                checkCommand.Parameters.AddWithValue("@NewVehicleNumber", newVehicleNumber);
+                                checkCommand.Parameters.AddWithValue("@VehicleID", vehicleID);
+                                bool exists = (bool)checkCommand.ExecuteScalar();
+                                if (exists)
+                                {
+                                    gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+                                    return gvarResponse;
+                                }
+                            }
+
+                            value = newVehicleNumber;
+                        }
+
+                        updateParts.Add($"\"{detail.Key}\" = {paramName}");
+                        parameters[paramName] = value;
+                    }
+                }
+
+                // Only proceed if there are fields to update
+                if (updateParts.Count > 0)
+                {
+                    string sql = $"UPDATE \"Vehicles\" SET {string.Join(", ", updateParts)} WHERE \"VehicleID\" = @VehicleID";
+                    using (var command = new NpgsqlCommand(sql, connection))
+                    {
+                        foreach (var param in parameters)
+                        {
+                            command.Parameters.AddWithValue(param.Key, param.Value);
+                        }
+                        command.Parameters.AddWithValue("@VehicleID", vehicleID);
+
+                        int rowsAffected = command.ExecuteNonQuery();
+                        if (rowsAffected == 0)
                         {
                             gvarResponse.DicOfDic["Tags"]["STS"] = "0";
                             return gvarResponse;
                         }
-                    }
-
-                    // Update VehicleNumber if provided and unique
-                    using (var updateCommand = new NpgsqlCommand("UPDATE \"Vehicles\" SET \"VehicleNumber\" = @VehicleNumber WHERE \"VehicleID\" = @VehicleID", connection))
-                    {
-                        updateCommand.Parameters.AddWithValue("@VehicleNumber", newVehicleNumber);
-                        updateCommand.Parameters.AddWithValue("@VehicleID", vehicleID);
-                        updateCommand.ExecuteNonQuery();
-                    }
-                }
-
-                // Update VehicleType if provided
-                if (vehicleDetails.TryGetValue("VehicleType", out string vehicleType))
-                {
-                    using (var updateCommand = new NpgsqlCommand("UPDATE \"Vehicles\" SET \"VehicleType\" = @VehicleType WHERE \"VehicleID\" = @VehicleID", connection))
-                    {
-                        updateCommand.Parameters.AddWithValue("@VehicleType", vehicleType ?? (object)DBNull.Value);
-                        updateCommand.Parameters.AddWithValue("@VehicleID", vehicleID);
-                        updateCommand.ExecuteNonQuery();
                     }
                 }
 
@@ -211,7 +243,7 @@ public class VehicleService
                 return gvarResponse;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             gvarResponse.DicOfDic["Tags"]["STS"] = "0";
             return gvarResponse;

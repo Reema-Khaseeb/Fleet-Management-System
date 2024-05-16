@@ -1,4 +1,5 @@
-﻿using FleetManagementSystem.Services;
+﻿using FleetManagementSystem.Services.Services;
+using FleetManagementSystem.Services.utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FleetManagementSystem.Api.Controllers;
@@ -24,7 +25,7 @@ public class VehiclesController : ControllerBase
     [HttpGet]
     public IActionResult GetVehiclesGvar()
     {
-        var gvarResponse = _vehicleService.GetVehiclesGvar();
+        var gvarResponse = _vehicleService.GetVehicles();
         return gvarResponse.DicOfDic["Tags"]["STS"] == "1" ? Ok(gvarResponse) : BadRequest(gvarResponse);
     }
 
