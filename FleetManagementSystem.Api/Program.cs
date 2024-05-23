@@ -28,12 +28,24 @@ public class Program
             .WriteTo.File(Path.Combine(logDirectory, "log-.txt"), 
             rollingInterval: RollingInterval.Day)); // roll over every day. To manage file sizes and makes logs easier to search through.
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll",
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+        });
 
         // Add services to the container.
         builder.Services.AddSingleton<IDatabaseConnection, DatabaseConnection>();
         builder.Services.AddScoped<VehicleService>();
         builder.Services.AddScoped<VehicleInformationService>();
         builder.Services.AddScoped<DriverService>();
+        builder.Services.AddScoped<RouteHistoryService>();
+        builder.Services.AddScoped<GeofenceService>();
 
         // Add controllers to the services container.
         builder.Services.AddControllers().AddJsonOptions(options =>
@@ -47,12 +59,19 @@ public class Program
 
         var app = builder.Build();
 
+        app.UseCors("AllowAll");
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseDeveloperExceptionPage();
         }
+
+        app.UseRouting();
+
+        app.UseCors("AllowAll");
 
         app.UseHttpsRedirection();
 

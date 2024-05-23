@@ -1,0 +1,57 @@
+<div class="container mt-5">
+  <h1 class="mb-3">Vehicle List</h1>
+
+  <ng-container *ngIf="vehicles.length > 0; else noVehicles">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>VehicleID</th>
+          <th>VehicleNumber</th>
+          <th>VehicleType</th>
+          <th>LastDirection</th>
+          <th>LastStatus</th>
+          <th>LastAddress</th>
+          <th>LastLatitude</th>
+          <th>LastLongitude</th>
+          <th>Show More Information</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let vehicle of vehicles">
+          <td>{{ vehicle.VehicleID }}</td>
+          <td>{{ vehicle.VehicleNumber }}</td>
+          <td>{{ vehicle.VehicleType }}</td>
+          <td>{{ vehicle.LastDirection }}</td>
+          <td>{{ vehicle.LastStatus }}</td>
+          <td>{{ vehicle.LastAddress }}</td>
+          <td>{{ vehicle.LastLatitude }}</td>
+          <td>{{ vehicle.LastLongitude }}</td>
+          <td>
+            <button class="btn btn-primary" (click)="showMore(vehicle.VehicleID)">Show More</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+
+  <ng-template #noVehicles>
+    <p>No vehicles available at the moment.</p>
+  </ng-template>
+
+  <div *ngIf="selectedVehicle" class="modal">
+    <div class="modal-content">
+      <span class="close" (click)="selectedVehicle = null">&times;</span>
+      <h2>Vehicle Details</h2>
+      <p>VehicleNumber: {{ selectedVehicle.VehicleNumber }}</p>
+      <p>VehicleType: {{ selectedVehicle.VehicleType }}</p>
+      <p>DriverName: {{ selectedVehicle.DriverName }}</p>
+      <p>PhoneNumber: {{ selectedVehicle.PhoneNumber }}</p>
+      <p>LastPosition: {{ selectedVehicle.LastLatitude }}, {{ selectedVehicle.LastLongitude }}</p>
+      <p>VehicleMake: {{ selectedVehicle.VehicleMake }}</p>
+      <p>VehicleModel: {{ selectedVehicle.VehicleModel }}</p>
+      <p>LastGPSTime: {{ selectedVehicle.LastGPSTime }}</p>
+      <p>LastGPSSpeed: {{ selectedVehicle.LastGPSSpeed }}</p>
+      <p>LastAddress: {{ selectedVehicle.LastAddress }}</p>
+    </div>
+  </div>
+</div>
