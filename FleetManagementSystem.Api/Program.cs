@@ -32,6 +32,8 @@ public class Program
         // Add services to the container.
         builder.Services.AddSingleton<IDatabaseConnection, DatabaseConnection>();
         builder.Services.AddScoped<VehicleService>();
+        builder.Services.AddScoped<VehicleInformationService>();
+        builder.Services.AddScoped<DriverService>();
 
         // Add controllers to the services container.
         builder.Services.AddControllers().AddJsonOptions(options =>
