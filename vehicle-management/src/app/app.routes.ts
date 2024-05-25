@@ -8,6 +8,7 @@ import { UpdateVehicleInfoComponent } from './vehicle-info/update-vehicle-info/u
 import { GetDriversComponent } from './driver/get-drivers/get-drivers.component';
 import { AddDriverComponent } from './driver/add-driver/add-driver.component';
 import { UpdateDriverComponent } from './driver/update-driver/update-driver.component';
+import { GetGeofencesComponent } from './geofence/get-geofences/get-geofences.component';
 
 export const routes: Routes = [
   { path: '', component: VehicleListComponent },
@@ -19,5 +20,7 @@ export const routes: Routes = [
   { path: 'get-drivers', component: GetDriversComponent },
   { path: 'add-driver', component: AddDriverComponent },
   { path: 'update-driver/:id', component: UpdateDriverComponent },
+  { path: 'get-geofences', component: GetGeofencesComponent },
   { path: '**', redirectTo: '' }
 ];
+  
