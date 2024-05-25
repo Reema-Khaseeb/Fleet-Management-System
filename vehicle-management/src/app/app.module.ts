@@ -5,6 +5,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { VehicleListComponent } from './vehicle-list/vehicle-list.component';
 import { VehicleDetailComponent } from './vehicle-detail/vehicle-detail.component';
+import { AddVehicleComponent } from './vehicle/add-vehicle/add-vehicle.component';
+import { UpdateVehicleComponent } from './vehicle/update-vehicle/update-vehicle.component';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms';
 
@@ -12,7 +14,9 @@ import { FormsModule } from '@angular/forms';
   declarations: [
     AppComponent,
     VehicleListComponent,
-    VehicleDetailComponent
+    VehicleDetailComponent,
+    AddVehicleComponent,
+    UpdateVehicleComponent
   ],
   imports: [
     BrowserModule,

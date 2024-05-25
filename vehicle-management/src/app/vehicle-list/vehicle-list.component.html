@@ -1,6 +1,8 @@
 <div class="container mt-5">
   <h1 class="mb-3">Vehicle List</h1>
 
+  <button class="btn btn-primary" (click)="navigateToAddVehicle()">Add Vehicle</button>
+
   <ng-container *ngIf="vehicles.length > 0; else noVehicles">
     <table class="table table-striped">
       <thead>
@@ -14,6 +16,7 @@
           <th>LastLatitude</th>
           <th>LastLongitude</th>
           <th>Show More Information</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -28,6 +31,10 @@
           <td>{{ vehicle.LastLongitude }}</td>
           <td>
             <button class="btn btn-primary" (click)="showMore(vehicle.VehicleID)">Show More</button>
+          </td>
+          <td>
+            <button class="btn btn-success" (click)="navigateToUpdateVehicle(vehicle.VehicleID)">Update</button>
+            <button class="btn btn-danger" (click)="deleteVehicle(vehicle.VehicleID)">Delete</button>
           </td>
         </tr>
       </tbody>
