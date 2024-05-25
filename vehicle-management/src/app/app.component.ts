@@ -5,7 +5,7 @@ import { VehicleListComponent } from './vehicle/vehicle-list/vehicle-list.compon
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, VehicleListComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

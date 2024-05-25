@@ -1,0 +1,39 @@
+<div class="container mt-5">
+  <h1 class="mb-3">Vehicle Information List</h1>
+
+  <button class="btn btn-primary mb-3" (click)="navigateToAddVehicleInfo()">Add Vehicle Info</button>
+
+  <ng-container *ngIf="vehicleInfos.length > 0; else noVehicleInfos">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>VehicleID</th>
+          <th>DriverID</th>
+          <th>VehicleMake</th>
+          <th>VehicleModel</th>
+          <th>PurchaseDate</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let info of vehicleInfos">
+          <td>{{ info.ID }}</td>
+          <td>{{ info.VehicleID }}</td>
+          <td>{{ info.DriverID }}</td>
+          <td>{{ info.VehicleMake }}</td>
+          <td>{{ info.VehicleModel }}</td>
+          <td>{{ info.PurchaseDate }}</td>
+          <td>
+            <button class="btn btn-success me-2" (click)="navigateToUpdateVehicleInfo(info.ID)">Update</button>
+            <button class="btn btn-danger" (click)="deleteVehicleInfo(info.ID)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+
+  <ng-template #noVehicleInfos>
+    <p>No vehicle information available at the moment.</p>
+  </ng-template>
+</div>
