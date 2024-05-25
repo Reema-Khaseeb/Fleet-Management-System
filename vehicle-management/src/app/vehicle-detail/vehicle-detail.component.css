@@ -1,3 +1,4 @@
+/* vehicle-detail.component.css */
 .modal {
   display: block; /* Make the modal visible */
   background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
@@ -60,4 +61,16 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 0;
+}
+
+/* Styles for the dropdown */
+select {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1rem;
 }

@@ -18,4 +18,8 @@ export class VehicleService {
   getVehicleDetails(vehicleID: number): Observable<GVAR> {
     return this.http.get<GVAR>(`${this.baseUrl}/vehicles/${vehicleID}`);
   }
+
+  getDrivers(): Observable<GVAR> {
+    return this.http.get<GVAR>(`${this.baseUrl}/drivers`);
+  }
 }

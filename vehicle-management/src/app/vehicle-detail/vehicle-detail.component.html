@@ -2,7 +2,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Vehicle Details</h5>
+        <h3 class="modal-title">Vehicle Details</h3>
         <button type="button" class="close" aria-label="Close" (click)="closeModal()">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -10,7 +10,11 @@
       <div class="modal-body">
         <p><strong>Vehicle Number:</strong> {{ vehicle.VehicleNumber }}</p>
         <p><strong>Vehicle Type:</strong> {{ vehicle.VehicleType }}</p>
-        <p><strong>DriverName:</strong> {{ vehicle.DriverName }}</p>
+        <p><strong>Driver Name:</strong>
+          <select [(ngModel)]="selectedDriver">
+            <option *ngFor="let driver of drivers" [value]="driver.DriverID">{{ driver.DriverName }}</option>
+          </select>
+        </p>
         <p><strong>Phone Number:</strong> {{ vehicle.PhoneNumber }}</p>
         <p><strong>Last Position:</strong> {{ vehicle.LastPosition }}</p>
         <p><strong>Vehicle Make:</strong> {{ vehicle.VehicleMake }}</p>

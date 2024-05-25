@@ -16,6 +16,7 @@ export class VehicleDetailComponent implements OnChanges {
   @Output() close = new EventEmitter<void>();
   vehicle: any;
   drivers: any[] = [];
+  selectedDriver: any;
 
   constructor(private vehicleService: VehicleService) {}
 
@@ -23,6 +24,7 @@ export class VehicleDetailComponent implements OnChanges {
     if (changes['vehicleID'] && changes['vehicleID'].currentValue) {
       console.log(`VehicleDetailComponent detected vehicleID change: ${this.vehicleID}`);
       this.loadVehicleDetails();
+      this.loadDrivers();
     }
   }
 
@@ -39,6 +41,23 @@ export class VehicleDetailComponent implements OnChanges {
       },
       (error) => {
         console.error('Error fetching vehicle details:', error);
+      }
+    );
+  }
+
+  loadDrivers(): void {
+    this.vehicleService.getDrivers().subscribe(
+      (data: GVAR) => {
+        console.log('Drivers fetched:', data);
+        if (data && data.DicOfDT && data.DicOfDT['Drivers']) {
+          this.drivers = data.DicOfDT['Drivers'];
+          console.log('Assigned drivers:', this.drivers);
+        } else {
+          console.error('Drivers not found in response:', data);
+        }
+      },
+      (error) => {
+        console.error('Error fetching drivers:', error);
       }
     );
   }
