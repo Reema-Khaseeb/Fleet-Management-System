@@ -5,7 +5,9 @@ import { UpdateVehicleComponent } from './vehicle/update-vehicle/update-vehicle.
 import { VehicleInfoListComponent } from './vehicle-info/vehicle-info-list/vehicle-info-list.component';
 import { AddVehicleInfoComponent } from './vehicle-info/add-vehicle-info/add-vehicle-info.component';
 import { UpdateVehicleInfoComponent } from './vehicle-info/update-vehicle-info/update-vehicle-info.component';
-
+import { GetDriversComponent } from './driver/get-drivers/get-drivers.component';
+import { AddDriverComponent } from './driver/add-driver/add-driver.component';
+import { UpdateDriverComponent } from './driver/update-driver/update-driver.component';
 
 export const routes: Routes = [
   { path: '', component: VehicleListComponent },
@@ -14,5 +16,8 @@ export const routes: Routes = [
   { path: 'vehicle-info-list', component: VehicleInfoListComponent },
   { path: 'add-vehicle-info', component: AddVehicleInfoComponent },
   { path: 'update-vehicle-info/:id', component: UpdateVehicleInfoComponent },
+  { path: 'get-drivers', component: GetDriversComponent },
+  { path: 'add-driver', component: AddDriverComponent },
+  { path: 'update-driver/:id', component: UpdateDriverComponent },
   { path: '**', redirectTo: '' }
 ];
