@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { GVAR } from './models/gvar.model';
+import { GVAR } from '../models/gvar.model';
 
 @Injectable({
   providedIn: 'root'

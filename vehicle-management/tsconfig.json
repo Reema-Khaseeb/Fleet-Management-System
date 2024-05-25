@@ -23,6 +23,13 @@
       "dom"
     ]
   },
+  "include": [
+    "src/**/*.ts",
+    "src/app/services/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,

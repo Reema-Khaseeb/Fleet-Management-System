@@ -1,8 +1,8 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { VehicleService } from '../vehicle.service';
-import { GVAR } from '../models/gvar.model';
+import { VehicleService } from '../../services/vehicle.service';
+import { GVAR } from '../../models/gvar.model';
 
 @Component({
   selector: 'app-vehicle-detail',

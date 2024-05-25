@@ -31,7 +31,7 @@
 //   }
 // }
 import { Component } from '@angular/core';
-import { VehicleService } from '../../vehicle.service';
+import { VehicleService } from '../../services/vehicle.service';
 import { GVAR } from '../../models/gvar.model';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';

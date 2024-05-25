@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { VehicleService } from '../vehicle.service';
-import { GVAR } from '../models/gvar.model';
+import { VehicleService } from '../../services/vehicle.service';
+import { GVAR } from '../../models/gvar.model';
 import { VehicleDetailComponent } from '../vehicle-detail/vehicle-detail.component';
 import { Router } from '@angular/router';
 

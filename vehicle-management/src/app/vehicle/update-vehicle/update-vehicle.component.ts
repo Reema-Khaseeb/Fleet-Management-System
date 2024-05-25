@@ -34,7 +34,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { VehicleService } from '../../vehicle.service';
+import { VehicleService } from '../../services/vehicle.service';
 import { GVAR } from '../../models/gvar.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
