@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { VehicleListComponent } from './vehicle-list/vehicle-list.component';
+import { VehicleListComponent } from './vehicle/vehicle-list/vehicle-list.component';
 
 @Component({
   selector: 'app-root',

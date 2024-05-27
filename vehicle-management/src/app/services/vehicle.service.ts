@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { GVAR } from './models/gvar.model';
+import { GVAR } from '../models/gvar.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,5 +21,17 @@ export class VehicleService {
 
   getDrivers(): Observable<GVAR> {
     return this.http.get<GVAR>(`${this.baseUrl}/drivers`);
+  }
+
+  addVehicle(gvar: GVAR): Observable<GVAR> {
+    return this.http.post<GVAR>(`${this.baseUrl}/vehicles`, gvar);
+  }
+
+  updateVehicle(gvar: GVAR): Observable<GVAR> {
+    return this.http.patch<GVAR>(`${this.baseUrl}/vehicles`, gvar);
+  }
+
+  deleteVehicle(gvar: GVAR): Observable<GVAR> {
+    return this.http.delete<GVAR>(`${this.baseUrl}/vehicles`, { body: gvar });
   }
 }

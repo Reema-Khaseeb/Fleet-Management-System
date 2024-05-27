@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { VehicleService } from '../vehicle.service';
-import { GVAR } from '../models/gvar.model';
+import { VehicleService } from '../../services/vehicle.service';
+import { GVAR } from '../../models/gvar.model';
 import { VehicleDetailComponent } from '../vehicle-detail/vehicle-detail.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -16,7 +17,7 @@ export class VehicleListComponent implements OnInit {
   selectedVehicleID: number | null = null;
   selectedVehicleDetails: any = null;
 
-  constructor(private vehicleService: VehicleService) {}
+  constructor(private vehicleService: VehicleService, private router: Router) {}
 
   ngOnInit(): void {
     this.vehicleService.getAllVehicles().subscribe(
@@ -38,5 +39,27 @@ export class VehicleListComponent implements OnInit {
   showMore(vehicleID: number): void {
     this.selectedVehicleID = vehicleID;
   }
-}
 
+  deleteVehicle(vehicleID: number): void {
+    const gvar: GVAR = {
+      DicOfDic: { Tags: { VehicleID: vehicleID.toString() } },
+      DicOfDT: {}
+    };
+
+    this.vehicleService.deleteVehicle(gvar).subscribe(response => {
+      if (response.DicOfDic['Tags']['STS'] === '1') {
+        this.vehicles = this.vehicles.filter(vehicle => vehicle.VehicleID !== vehicleID);
+      } else {
+        alert('Error deleting vehicle');
+      }
+    });
+  }
+
+  navigateToAddVehicle(): void {
+    this.router.navigate(['/add-vehicle']);
+  }
+
+  navigateToUpdateVehicle(vehicleID: number): void {
+    this.router.navigate(['/update-vehicle', vehicleID]);
+  }
+}
