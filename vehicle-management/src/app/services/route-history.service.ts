@@ -11,6 +11,10 @@ export class RouteHistoryService {
 
   constructor(private http: HttpClient) { }
 
+  addRouteHistory(gvar: GVAR): Observable<GVAR> {
+    return this.http.post<GVAR>(`${this.baseUrl}/route-history`, gvar);
+  }
+
   getRouteHistory(vehicleID: number, startEpoch: number, endEpoch: number): Observable<GVAR> {
     return this.http.get<GVAR>(`${this.baseUrl}/vehicles/${vehicleID}/routehistory`, {
       params: {
@@ -18,5 +22,9 @@ export class RouteHistoryService {
         endEpoch: endEpoch.toString()
       }
     });
+  }
+
+  getVehicles(): Observable<GVAR> {
+    return this.http.get<GVAR>(`${this.baseUrl}/vehicles`);
   }
 }
