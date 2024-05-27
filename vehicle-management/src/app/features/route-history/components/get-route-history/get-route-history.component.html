@@ -1,0 +1,45 @@
+<h2>Get Route History</h2>
+<form [formGroup]="routeHistoryForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label for="vehicleId">Vehicle ID:</label>
+    <input id="vehicleId" formControlName="vehicleId" />
+  </div>
+  <div>
+    <label for="startEpoch">Start Epoch:</label>
+    <input id="startEpoch" formControlName="startEpoch" />
+  </div>
+  <div>
+    <label for="endEpoch">End Epoch:</label>
+    <input id="endEpoch" formControlName="endEpoch" />
+  </div>
+  <button type="submit">Get Route History</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>Vehicle ID</th>
+      <th>Vehicle Number</th>
+      <th>Address</th>
+      <th>Status</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Vehicle Direction</th>
+      <th>GPS Speed</th>
+      <th>GPS Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let route of routeHistory">
+      <td>{{ route.VehicleID }}</td>
+      <td>{{ route.VehicleNumber }}</td>
+      <td>{{ route.Address }}</td>
+      <td>{{ route.Status }}</td>
+      <td>{{ route.Latitude }}</td>
+      <td>{{ route.Longitude }}</td>
+      <td>{{ route.VehicleDirection }}</td>
+      <td>{{ route.GPSSpeed }}</td>
+      <td>{{ route.GPSTime }}</td>
+    </tr>
+  </tbody>
+</table>
