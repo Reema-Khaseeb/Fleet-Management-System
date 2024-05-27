@@ -289,7 +289,7 @@ public class VehicleService
                             row["LastAddress"] = reader["LastAddress"]?.ToString();
                             dataTable.Rows.Add(row);
 
-                            gvar.DicOfDT["'VehicleInformation'"] = dataTable;
+                            gvar.DicOfDT["VehicleInformation"] = dataTable;
                             gvar.DicOfDic["Tags"]["STS"] = "1"; // Indicate success
                         }
                         else

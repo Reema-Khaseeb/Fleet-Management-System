@@ -38,20 +38,5 @@
     <p>No vehicles available at the moment.</p>
   </ng-template>
 
-  <div *ngIf="selectedVehicle" class="modal">
-    <div class="modal-content">
-      <span class="close" (click)="selectedVehicle = null">&times;</span>
-      <h2>Vehicle Details</h2>
-      <p>VehicleNumber: {{ selectedVehicle.VehicleNumber }}</p>
-      <p>VehicleType: {{ selectedVehicle.VehicleType }}</p>
-      <p>DriverName: {{ selectedVehicle.DriverName }}</p>
-      <p>PhoneNumber: {{ selectedVehicle.PhoneNumber }}</p>
-      <p>LastPosition: {{ selectedVehicle.LastLatitude }}, {{ selectedVehicle.LastLongitude }}</p>
-      <p>VehicleMake: {{ selectedVehicle.VehicleMake }}</p>
-      <p>VehicleModel: {{ selectedVehicle.VehicleModel }}</p>
-      <p>LastGPSTime: {{ selectedVehicle.LastGPSTime }}</p>
-      <p>LastGPSSpeed: {{ selectedVehicle.LastGPSSpeed }}</p>
-      <p>LastAddress: {{ selectedVehicle.LastAddress }}</p>
-    </div>
-  </div>
+  <app-vehicle-detail *ngIf="selectedVehicleID" [vehicleID]="selectedVehicleID" (close)="selectedVehicleID = null"></app-vehicle-detail>
 </div>
