@@ -7,16 +7,22 @@ import { VehicleListComponent } from './vehicle/vehicle-list/vehicle-list.compon
 import { VehicleDetailComponent } from './vehicle/vehicle-detail/vehicle-detail.component';
 import { AddVehicleComponent } from './vehicle/add-vehicle/add-vehicle.component';
 import { UpdateVehicleComponent } from './vehicle/update-vehicle/update-vehicle.component';
+import { VehicleInfoListComponent } from './vehicle-info/vehicle-info-list/vehicle-info-list.component';
+import { AddVehicleInfoComponent } from './vehicle-info/add-vehicle-info/add-vehicle-info.component';
+import { UpdateVehicleInfoComponent } from './vehicle-info/update-vehicle-info/update-vehicle-info.component';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
-    VehicleListComponent,
-    VehicleDetailComponent,
-    AddVehicleComponent,
-    UpdateVehicleComponent
+        VehicleListComponent,
+        VehicleDetailComponent,
+        AddVehicleComponent,
+        UpdateVehicleComponent,
+        VehicleInfoListComponent,
+        AddVehicleInfoComponent,
+        UpdateVehicleInfoComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,27 @@
+<div>
+    <h2>Add Vehicle Information</h2>
+    <form (ngSubmit)="addVehicleInfo()">
+      <div>
+        <label for="VehicleID">Vehicle ID:</label>
+        <input id="VehicleID" [(ngModel)]="vehicleInfo.VehicleID" name="VehicleID" required>
+      </div>
+      <div>
+        <label for="DriverID">Driver ID:</label>
+        <input id="DriverID" [(ngModel)]="vehicleInfo.DriverID" name="DriverID">
+      </div>
+      <div>
+        <label for="VehicleMake">Vehicle Make:</label>
+        <input id="VehicleMake" [(ngModel)]="vehicleInfo.VehicleMake" name="VehicleMake">
+      </div>
+      <div>
+        <label for="VehicleModel">Vehicle Model:</label>
+        <input id="VehicleModel" [(ngModel)]="vehicleInfo.VehicleModel" name="VehicleModel">
+      </div>
+      <div>
+        <label for="PurchaseDate">Purchase Date:</label>
+        <input id="PurchaseDate" [(ngModel)]="vehicleInfo.PurchaseDate" name="PurchaseDate">
+      </div>
+      <button type="submit" class="btn btn-primary">Add Vehicle Info</button>
+    </form>
+  </div>
+  
