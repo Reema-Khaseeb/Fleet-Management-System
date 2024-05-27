@@ -1,0 +1,30 @@
+<div class="container">
+    <h1>Geofence List</h1>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>GeofenceID</th>
+          <th>GeofenceType</th>
+          <th>AddedDate</th>
+          <th>StrokeColor</th>
+          <th>StrokeOpacity</th>
+          <th>StrokeWeight</th>
+          <th>FillColor</th>
+          <th>FillOpacity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let geofence of geofences">
+          <td>{{ geofence.GeofenceID }}</td>
+          <td>{{ geofence.GeofenceType }}</td>
+          <td>{{ geofence.AddedDate }}</td>
+          <td>{{ geofence.StrokeColor }}</td>
+          <td>{{ geofence.StrokeOpacity }}</td>
+          <td>{{ geofence.StrokeWeight }}</td>
+          <td>{{ geofence.FillColor }}</td>
+          <td>{{ geofence.FillOpacity }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

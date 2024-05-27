@@ -1,0 +1,26 @@
+<div class="container">
+  <h1>Update Vehicle Information</h1>
+  <form (ngSubmit)="updateVehicleInfo()">
+    <div>
+      <label>Vehicle ID:</label>
+      <input type="text" [(ngModel)]="vehicleInfo.VehicleID" name="VehicleID">
+    </div>
+    <div>
+      <label>Driver ID:</label>
+      <input type="text" [(ngModel)]="vehicleInfo.DriverID" name="DriverID">
+    </div>
+    <div>
+      <label>Vehicle Make:</label>
+      <input type="text" [(ngModel)]="vehicleInfo.VehicleMake" name="VehicleMake">
+    </div>
+    <div>
+      <label>Vehicle Model:</label>
+      <input type="text" [(ngModel)]="vehicleInfo.VehicleModel" name="VehicleModel">
+    </div>
+    <div>
+      <label>Purchase Date:</label>
+      <input type="text" [(ngModel)]="vehicleInfo.PurchaseDate" name="PurchaseDate">
+    </div>
+    <button type="submit" class="btn btn-primary">Update Vehicle Info</button>
+  </form>
+</div>

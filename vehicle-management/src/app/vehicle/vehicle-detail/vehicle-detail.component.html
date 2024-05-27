@@ -1,0 +1,31 @@
+<div class="modal" tabindex="-1" role="dialog" *ngIf="vehicle">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Vehicle Details</h3>
+        <button type="button" class="close" aria-label="Close" (click)="closeModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Vehicle Number:</strong> {{ vehicle.VehicleNumber }}</p>
+        <p><strong>Vehicle Type:</strong> {{ vehicle.VehicleType }}</p>
+        <p><strong>Driver Name:</strong>
+          <select [(ngModel)]="selectedDriver">
+            <option *ngFor="let driver of drivers" [value]="driver.DriverID">{{ driver.DriverName }}</option>
+          </select>
+        </p>
+        <p><strong>Phone Number:</strong> {{ vehicle.PhoneNumber }}</p>
+        <p><strong>Last Position:</strong> {{ vehicle.LastPosition }}</p>
+        <p><strong>Vehicle Make:</strong> {{ vehicle.VehicleMake }}</p>
+        <p><strong>Vehicle Model:</strong> {{ vehicle.VehicleModel }}</p>
+        <p><strong>Last GPS Time:</strong> {{ vehicle.LastGPSTime }}</p>
+        <p><strong>Last GPS Speed:</strong> {{ vehicle.LastGPSSpeed }}</p>
+        <p><strong>Last Address:</strong> {{ vehicle.LastAddress }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

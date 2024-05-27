@@ -1,0 +1,25 @@
+<div class="container">
+    <h1>Driver List</h1>
+    <button class="btn btn-primary" (click)="navigateToAddDriver()">Add Driver</button>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>DriverID</th>
+          <th>DriverName</th>
+          <th>PhoneNumber</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let driver of drivers">
+          <td>{{ driver.DriverID }}</td>
+          <td>{{ driver.DriverName }}</td>
+          <td>{{ driver.PhoneNumber }}</td>
+          <td>
+            <button class="btn btn-success" (click)="navigateToUpdateDriver(driver.DriverID)">Update</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
