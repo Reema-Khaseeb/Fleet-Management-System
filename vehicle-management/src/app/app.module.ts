@@ -13,6 +13,7 @@ import { UpdateVehicleInfoComponent } from './vehicle-info/update-vehicle-info/u
 import { GetDriversComponent } from './driver/get-drivers/get-drivers.component';
 import { AddDriverComponent } from './driver/add-driver/add-driver.component';
 import { UpdateDriverComponent } from './driver/update-driver/update-driver.component';
+import { GetGeofencesComponent } from './geofence/get-geofences/get-geofences.component';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms';
 
@@ -28,7 +29,8 @@ import { FormsModule } from '@angular/forms';
     UpdateVehicleInfoComponent,
     GetDriversComponent,
     AddDriverComponent,
-    UpdateDriverComponent
+    UpdateDriverComponent,
+    GetGeofencesComponent
   ],
   imports: [
     BrowserModule,
