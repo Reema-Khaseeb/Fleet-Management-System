@@ -1,0 +1,15 @@
+<div class="container">
+    <h1>Add Driver</h1>
+    <form (ngSubmit)="addDriver()">
+      <div>
+        <label>Driver Name:</label>
+        <input type="text" [(ngModel)]="driver.DriverName" name="DriverName">
+      </div>
+      <div>
+        <label>Phone Number:</label>
+        <input type="text" [(ngModel)]="driver.PhoneNumber" name="PhoneNumber">
+      </div>
+      <button type="submit" class="btn btn-primary">Add Driver</button>
+    </form>
+  </div>
+  

@@ -10,19 +10,25 @@ import { UpdateVehicleComponent } from './vehicle/update-vehicle/update-vehicle.
 import { VehicleInfoListComponent } from './vehicle-info/vehicle-info-list/vehicle-info-list.component';
 import { AddVehicleInfoComponent } from './vehicle-info/add-vehicle-info/add-vehicle-info.component';
 import { UpdateVehicleInfoComponent } from './vehicle-info/update-vehicle-info/update-vehicle-info.component';
+import { GetDriversComponent } from './driver/get-drivers/get-drivers.component';
+import { AddDriverComponent } from './driver/add-driver/add-driver.component';
+import { UpdateDriverComponent } from './driver/update-driver/update-driver.component';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
-        VehicleListComponent,
-        VehicleDetailComponent,
-        AddVehicleComponent,
-        UpdateVehicleComponent,
-        VehicleInfoListComponent,
-        AddVehicleInfoComponent,
-        UpdateVehicleInfoComponent
+    VehicleListComponent,
+    VehicleDetailComponent,
+    AddVehicleComponent,
+    UpdateVehicleComponent,
+    VehicleInfoListComponent,
+    AddVehicleInfoComponent,
+    UpdateVehicleInfoComponent,
+    GetDriversComponent,
+    AddDriverComponent,
+    UpdateDriverComponent
   ],
   imports: [
     BrowserModule,
