@@ -23,9 +23,9 @@ public class VehiclesController : ControllerBase
     }
 
     [HttpDelete]
-    public IActionResult DeleteVehicle([FromBody] GVAR gvar)
+    public async Task<IActionResult> DeleteVehicle([FromBody] GVAR gvar, CancellationToken cancellationToken)
     {
-        var gvarResponse = _vehicleService.DeleteVehicle(gvar);
+        var gvarResponse = await _vehicleService.DeleteVehicleAsync(gvar, cancellationToken);
         return gvarResponse.DicOfDic["Tags"]["STS"] == "1" ? Ok(gvarResponse) : BadRequest(gvarResponse);
     }
 

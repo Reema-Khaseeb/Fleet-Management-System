@@ -54,46 +54,35 @@ public class VehicleService : IVehicleService
             return gvarResponse;
         }
 
-    public GVAR DeleteVehicle(GVAR gvar)
+    public async Task<GVAR> DeleteVehicleAsync(GVAR gvar, CancellationToken cancellationToken)
     {
-        var gvarResponse = new GVAR();
-        gvarResponse.DicOfDic["Tags"] = new ConcurrentDictionary<string, string>();
+        var gvarResponse = GVARUtility.InitializeGVARResponse();
 
         try
         {
-            if (!gvar.DicOfDic.TryGetValue("Tags", out var vehicleDetails))
+            if (!TryGetVehicleDetails(gvar, gvarResponse, out var vehicleDetails))
+            {
+                _logger.Error("Failed to get vehicle details");
+                return gvarResponse;
+            }
+
+            if (!TryGetVehicleId(vehicleDetails, out long vehicleId, gvarResponse))
             {
                 gvarResponse.DicOfDic["Tags"]["STS"] = "0";
                 return gvarResponse;
             }
 
-            if (!vehicleDetails.TryGetValue("VehicleID", out string vehicleIDString) || !long.TryParse(vehicleIDString, out long vehicleID))
-            {
-                gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                return gvarResponse;
-            }
-
-            using (var connection = _databaseConnection.GetConnection())
-            {
-                connection.Open();
-                using (var command = new NpgsqlCommand("DELETE FROM \"Vehicles\" WHERE \"VehicleID\" = @VehicleID", connection))
-                {
-                    command.Parameters.AddWithValue("@VehicleID", vehicleID);
-                    int rowsAffected = command.ExecuteNonQuery();
-                    if (rowsAffected == 0)
-                    {
-                        gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                        return gvarResponse;
-                    }
-                }
-            }
+            await _vehicleRepository.DeleteVehicleAsync(vehicleId, cancellationToken);
 
             gvarResponse.DicOfDic["Tags"]["STS"] = "1";
-            return gvarResponse;
+            _logger.Information($"Successfully deleted vehicle with ID: {vehicleId}");
         }
         catch (Exception ex)
         {
+            _logger.Error(ex, "Exception occurred while deleting vehicle");
             gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+        }
+
             return gvarResponse;
         }
     }
@@ -483,4 +472,16 @@ public class VehicleService : IVehicleService
         }
         return true;
         }
+
+    private bool TryGetVehicleId(ConcurrentDictionary<string, string> vehicleDetails, out long vehicleId, GVAR gvarResponse)
+    {
+        vehicleId = 0;
+        if (!vehicleDetails.TryGetValue("VehicleID", out string vehicleIdString) || !long.TryParse(vehicleIdString, out vehicleId))
+        {
+            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            _logger.Error($"Failed to parse vehicle ID: {vehicleIdString}");
+            return false;
+        }
+        return true;
+    }
 }

@@ -5,7 +5,7 @@ namespace FleetManagementSystem.Services.Interfaces;
 public interface IVehicleService
 {
     Task<GVAR> AddVehicleAsync(GVAR gvar, CancellationToken cancellationToken);
-    GVAR DeleteVehicle(GVAR gvar);
+    Task<GVAR> DeleteVehicleAsync(GVAR gvar, CancellationToken cancellationToken);
     GVAR UpdateVehicle(GVAR gvar);
     GVAR GetVehicleDetails(long vehicleID);
     GVAR GetVehicles();

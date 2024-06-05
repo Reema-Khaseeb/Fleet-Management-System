@@ -1,7 +1,7 @@
-﻿namespace FleetManagementSystem.Db.Interfaces
+﻿namespace FleetManagementSystem.Db.Interfaces;
+
+public interface IVehicleRepository
 {
-    public interface IVehicleRepository
-    {
-        Task AddVehicleAsync(long vehicleNumber, string vehicleType, CancellationToken cancellationToken);
-    }
+    Task AddVehicleAsync(long vehicleNumber, string vehicleType, CancellationToken cancellationToken);
+    Task DeleteVehicleAsync(long vehicleId, CancellationToken cancellationToken);
 }
