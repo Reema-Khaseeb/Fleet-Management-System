@@ -5,6 +5,7 @@ using FleetManagementSystem.Services;
 using FleetManagementSystem.Services.Services;
 using FleetManagementSystem.Services.utils;
 using FleetManagementSystem.Services.Interfaces;
+using FleetManagementSystem.Db.Repositories;
 
 namespace FleetManagementSystem.Api;
 
@@ -52,6 +53,9 @@ public class Program
                        .AllowAnyHeader();
             });
         });
+
+        // Add repositories to the container.
+        services.AddScoped<IVehicleRepository, VehicleRepository>();
 
         // Add services to the container.
         services.AddSingleton<IDatabaseConnection, DatabaseConnection>();

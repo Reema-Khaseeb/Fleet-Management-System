@@ -10,13 +10,16 @@ namespace FleetManagementSystem.Services;
 
 public class VehicleService : IVehicleService
 {
+    private readonly IVehicleRepository _vehicleRepository;
     private readonly IDatabaseConnection _databaseConnection;
     private readonly ILogger _logger;
 
-    public VehicleService(IDatabaseConnection databaseConnection, ILogger logger)
+    public VehicleService(IDatabaseConnection databaseConnection,
+        ILogger logger, IVehicleRepository vehicleRepository)
     {
         _databaseConnection = databaseConnection;
         _logger = logger;
+        _vehicleRepository = vehicleRepository;
     }
 
     public async Task<GVAR> AddVehicleAsync(GVAR gvar, CancellationToken cancellationToken)
@@ -25,7 +28,7 @@ public class VehicleService : IVehicleService
 
         try
         {
-            if (!TryGetVehicleDetails(gvar, out var vehicleDetails, gvarResponse))
+            if (!TryGetVehicleDetails(gvar, gvarResponse, out var vehicleDetails))
             {
                 _logger.Error("Failed to get vehicle details");
                 return gvarResponse;
@@ -33,23 +36,11 @@ public class VehicleService : IVehicleService
 
             if (!TryGetVehicleNumber(vehicleDetails, out long vehicleNumber, gvarResponse))
             {
-                gvarResponse.DicOfDic["Tags"]["STS"] = "0";
                 return gvarResponse;
             }
 
             var vehicleType = vehicleDetails["VehicleType"];
-            await InsertVehicleToDatabaseAsync(vehicleNumber, vehicleType, cancellationToken);
-
-            using (var connection = _databaseConnection.GetConnection())
-            {
-                connection.Open();
-                using (var command = new NpgsqlCommand("INSERT INTO \"Vehicles\" (\"VehicleNumber\", \"VehicleType\") VALUES (@VehicleNumber, @VehicleType)", connection))
-                {
-                    command.Parameters.AddWithValue("@VehicleNumber", vehicleNumber);
-                    command.Parameters.AddWithValue("@VehicleType", vehicleType);
-                    command.ExecuteNonQuery();
-                }
-            }
+            await _vehicleRepository.AddVehicleAsync(vehicleNumber, vehicleType, cancellationToken);
 
             gvarResponse.DicOfDic["Tags"]["STS"] = "1";
             _logger.Information($"Successfully added vehicle with number: {vehicleNumber}");
@@ -62,7 +53,6 @@ public class VehicleService : IVehicleService
 
             return gvarResponse;
         }
-    }
 
     public GVAR DeleteVehicle(GVAR gvar)
     {
@@ -470,7 +460,8 @@ public class VehicleService : IVehicleService
         {
             gvar.DicOfDic["Tags"]["STS"] = "0"; // Indicate failure
 
-    private bool TryGetVehicleDetails(GVAR gvar, out ConcurrentDictionary<string, string> vehicleDetails, GVAR gvarResponse)
+    private bool TryGetVehicleDetails(GVAR gvar, GVAR gvarResponse, 
+        out ConcurrentDictionary<string, string> vehicleDetails)
     {
         if (!gvar.DicOfDic.TryGetValue("Tags", out vehicleDetails))
         {
@@ -481,7 +472,8 @@ public class VehicleService : IVehicleService
         return true;
     }
 
-    private bool TryGetVehicleNumber(ConcurrentDictionary<string, string> vehicleDetails, out long vehicleNumber, GVAR gvarResponse)
+    private bool TryGetVehicleNumber(ConcurrentDictionary<string, string> vehicleDetails, 
+        out long vehicleNumber, GVAR gvarResponse)
     {
         if (!long.TryParse(vehicleDetails["VehicleNumber"], out vehicleNumber))
         {
@@ -491,27 +483,4 @@ public class VehicleService : IVehicleService
         }
         return true;
         }
-
-    private async Task InsertVehicleToDatabaseAsync(long vehicleNumber, string vehicleType, CancellationToken cancellationToken)
-    {
-        await using var connection = await _databaseConnection.GetConnectionAsync(cancellationToken);
-        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
-        try
-        {
-            var query = "INSERT INTO \"Vehicles\" (\"VehicleNumber\", \"VehicleType\") VALUES (@VehicleNumber, @VehicleType)";
-            await using var command = new NpgsqlCommand(query, connection, transaction);
-            command.Parameters.AddWithValue("@VehicleNumber", vehicleNumber);
-            command.Parameters.AddWithValue("@VehicleType", vehicleType);
-            await command.ExecuteNonQueryAsync(cancellationToken);
-
-            await transaction.CommitAsync(cancellationToken);
-            _logger.Information("Vehicle with number {VehicleNumber} and type {VehicleType} inserted into database", vehicleNumber, vehicleType);
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            _logger.Error(ex, "Error occurred while inserting vehicle to database, transaction rolled back");
-            throw;
-        }
-    }
 }
