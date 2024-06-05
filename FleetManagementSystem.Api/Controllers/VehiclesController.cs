@@ -1,4 +1,4 @@
-﻿using FleetManagementSystem.Services;
+﻿using FleetManagementSystem.Services.Interfaces;
 using FleetManagementSystem.Services.utils;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,17 +8,17 @@ namespace FleetManagementSystem.Api.Controllers;
 [Route("api/1/vehicles")]
 public class VehiclesController : ControllerBase
 {
-    private readonly VehicleService _vehicleService;
+    private readonly IVehicleService _vehicleService;
 
-    public VehiclesController(VehicleService vehicleService)
+    public VehiclesController(IVehicleService vehicleService)
     {
         _vehicleService = vehicleService;
     }
 
     [HttpPost]
-    public IActionResult AddVehicle([FromBody] GVAR gvar)
+    public async Task<IActionResult> AddVehicle([FromBody] GVAR gvar, CancellationToken cancellationToken)
     {
-        var gvarResponse = _vehicleService.AddVehicle(gvar);
+        var gvarResponse = await _vehicleService.AddVehicleAsync(gvar, cancellationToken);
         return gvarResponse.DicOfDic["Tags"]["STS"] == "1" ? Ok(gvarResponse) : BadRequest(gvarResponse);
     }
 

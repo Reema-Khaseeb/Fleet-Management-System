@@ -17,4 +17,11 @@ public class DatabaseConnection : IDatabaseConnection
     {
         return new NpgsqlConnection(_configuration.GetConnectionString("DefaultConnection"));
     }
+
+    public async Task<NpgsqlConnection> GetConnectionAsync(CancellationToken cancellationToken)
+    {
+        var connection = new NpgsqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        await connection.OpenAsync(cancellationToken);
+        return connection;
+    }
 }

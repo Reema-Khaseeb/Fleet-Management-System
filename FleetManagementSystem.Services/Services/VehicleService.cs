@@ -1,41 +1,44 @@
 ﻿using FleetManagementSystem.Db.Interfaces;
+using FleetManagementSystem.Services.Interfaces;
 using FleetManagementSystem.Services.utils;
 using Npgsql;
 using System.Collections.Concurrent;
 using System.Data;
+using Serilog;
 
 namespace FleetManagementSystem.Services;
 
-public class VehicleService
+public class VehicleService : IVehicleService
 {
     private readonly IDatabaseConnection _databaseConnection;
+    private readonly ILogger _logger;
 
-    public VehicleService(IDatabaseConnection databaseConnection)
+    public VehicleService(IDatabaseConnection databaseConnection, ILogger logger)
     {
         _databaseConnection = databaseConnection;
+        _logger = logger;
     }
 
-    public GVAR AddVehicle(GVAR gvar)
+    public async Task<GVAR> AddVehicleAsync(GVAR gvar, CancellationToken cancellationToken)
     {
-        var gvarResponse = new GVAR();
-        gvarResponse.DicOfDic["Tags"] = new ConcurrentDictionary<string, string>();
+        var gvarResponse = GVARUtility.InitializeGVARResponse();
 
         try
         {
-            if (!gvar.DicOfDic.TryGetValue("Tags", out var vehicleDetails))
+            if (!TryGetVehicleDetails(gvar, out var vehicleDetails, gvarResponse))
+            {
+                _logger.Error("Failed to get vehicle details");
+                return gvarResponse;
+            }
+
+            if (!TryGetVehicleNumber(vehicleDetails, out long vehicleNumber, gvarResponse))
             {
                 gvarResponse.DicOfDic["Tags"]["STS"] = "0";
                 return gvarResponse;
             }
 
-            // Convert VehicleNumber to long since the database expects a bigint
-            if (!long.TryParse(vehicleDetails["VehicleNumber"], out long vehicleNumber))
-            {
-                gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                return gvarResponse;
-            }
-
-            string vehicleType = vehicleDetails["VehicleType"];
+            var vehicleType = vehicleDetails["VehicleType"];
+            await InsertVehicleToDatabaseAsync(vehicleNumber, vehicleType, cancellationToken);
 
             using (var connection = _databaseConnection.GetConnection())
             {
@@ -49,11 +52,14 @@ public class VehicleService
             }
 
             gvarResponse.DicOfDic["Tags"]["STS"] = "1";
-            return gvarResponse;
+            _logger.Information($"Successfully added vehicle with number: {vehicleNumber}");
         }
         catch (Exception ex)
         {
+            _logger.Error(ex, "Exception occurred while adding vehicle");
             gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+        }
+
             return gvarResponse;
         }
     }
@@ -463,8 +469,49 @@ public class VehicleService
         catch (Exception)
         {
             gvar.DicOfDic["Tags"]["STS"] = "0"; // Indicate failure
+
+    private bool TryGetVehicleDetails(GVAR gvar, out ConcurrentDictionary<string, string> vehicleDetails, GVAR gvarResponse)
+    {
+        if (!gvar.DicOfDic.TryGetValue("Tags", out vehicleDetails))
+        {
+            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            _logger.Error("Failed to get vehicle details");
+            return false;
+        }
+        return true;
+    }
+
+    private bool TryGetVehicleNumber(ConcurrentDictionary<string, string> vehicleDetails, out long vehicleNumber, GVAR gvarResponse)
+    {
+        if (!long.TryParse(vehicleDetails["VehicleNumber"], out vehicleNumber))
+        {
+            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            _logger.Error($"Failed to parse vehicle number: {vehicleDetails["VehicleNumber"]}");
+            return false;
+        }
+        return true;
         }
 
-        return gvar;
+    private async Task InsertVehicleToDatabaseAsync(long vehicleNumber, string vehicleType, CancellationToken cancellationToken)
+    {
+        await using var connection = await _databaseConnection.GetConnectionAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var query = "INSERT INTO \"Vehicles\" (\"VehicleNumber\", \"VehicleType\") VALUES (@VehicleNumber, @VehicleType)";
+            await using var command = new NpgsqlCommand(query, connection, transaction);
+            command.Parameters.AddWithValue("@VehicleNumber", vehicleNumber);
+            command.Parameters.AddWithValue("@VehicleType", vehicleType);
+            await command.ExecuteNonQueryAsync(cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+            _logger.Information("Vehicle with number {VehicleNumber} and type {VehicleType} inserted into database", vehicleNumber, vehicleType);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            _logger.Error(ex, "Error occurred while inserting vehicle to database, transaction rolled back");
+            throw;
+        }
     }
 }
