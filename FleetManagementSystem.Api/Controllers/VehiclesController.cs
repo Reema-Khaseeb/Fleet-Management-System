@@ -30,11 +30,12 @@ public class VehiclesController : ControllerBase
     }
 
     [HttpPatch]
-    public IActionResult UpdateVehicle([FromBody] GVAR gvar)
+    public async Task<IActionResult> UpdateVehicle([FromBody] GVAR gvar, CancellationToken cancellationToken)
     {
-        var gvarResponse = _vehicleService.UpdateVehicle(gvar);
+        var gvarResponse = await _vehicleService.UpdateVehicleAsync(gvar, cancellationToken);
         return gvarResponse.DicOfDic["Tags"]["STS"] == "1" ? Ok(gvarResponse) : BadRequest(gvarResponse);
     }
+
 
     [HttpGet("{vehicleID}")]
     public IActionResult GetVehicleDetails(long vehicleID)

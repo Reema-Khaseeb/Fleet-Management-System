@@ -62,13 +62,11 @@ public class VehicleService : IVehicleService
         {
             if (!TryGetVehicleDetails(gvar, gvarResponse, out var vehicleDetails))
             {
-                _logger.Error("Failed to get vehicle details");
                 return gvarResponse;
             }
 
             if (!TryGetVehicleId(vehicleDetails, out long vehicleId, gvarResponse))
             {
-                gvarResponse.DicOfDic["Tags"]["STS"] = "0";
                 return gvarResponse;
             }
 
@@ -85,109 +83,42 @@ public class VehicleService : IVehicleService
 
             return gvarResponse;
         }
-    }
 
-    public GVAR UpdateVehicle(GVAR gvar)
+    public async Task<GVAR> UpdateVehicleAsync(GVAR gvar, CancellationToken cancellationToken)
     {
-        var gvarResponse = new GVAR();
-        gvarResponse.DicOfDic["Tags"] = new ConcurrentDictionary<string, string>();
+        var gvarResponse = GVARUtility.InitializeGVARResponse();
 
         try
         {
-            if (!gvar.DicOfDic.TryGetValue("Tags", out var vehicleDetails))
+            if (!TryGetVehicleDetails(gvar, gvarResponse, out var vehicleDetails))
             {
-                gvarResponse.DicOfDic["Tags"]["STS"] = "0";
                 return gvarResponse;
             }
 
-            if (!vehicleDetails.TryGetValue("VehicleID", out string vehicleIDString) || !long.TryParse(vehicleIDString, out long vehicleID))
+            if (!TryGetVehicleId(vehicleDetails, out long vehicleId, gvarResponse))
             {
-                gvarResponse.DicOfDic["Tags"]["STS"] = "0";
                 return gvarResponse;
             }
 
-            using (var connection = _databaseConnection.GetConnection())
+            var updateResult = await GetUpdateDataAsync(vehicleDetails, vehicleId, gvarResponse, cancellationToken);
+            if (!updateResult.IsSuccess)
             {
-                connection.Open();
-
-                // Check if the VehicleID exists
-                using (var checkCommand = new NpgsqlCommand("SELECT EXISTS (SELECT 1 FROM \"Vehicles\" WHERE \"VehicleID\" = @VehicleID)", connection))
-                {
-                    checkCommand.Parameters.AddWithValue("@VehicleID", vehicleID);
-                    bool exists = (bool)checkCommand.ExecuteScalar();
-                    if (!exists)
-                    {
-                        gvarResponse.DicOfDic["Tags"]["STS"] = "0";
                         return gvarResponse;
                     }
-                }
 
-                var updateParts = new List<string>();
-                var parameters = new Dictionary<string, object>();
+            await _vehicleRepository.UpdateVehicleAsync(vehicleId, updateResult.UpdateData, cancellationToken);
 
-                // Process each field dynamically, excluding the primary key "VehicleID"
-                foreach (var detail in vehicleDetails)
-                {
-                    if (detail.Key != "VehicleID" && detail.Value != null)
-                    {
-                        string paramName = "@" + detail.Key;
-                        object value = detail.Value;
-
-                        // Handle type conversion for VehicleNumber and check for uniqueness
-                        if (detail.Key == "VehicleNumber" && long.TryParse(detail.Value, out long newVehicleNumber))
-                        {
-                            // Check for unique VehicleNumber if provided
-                            using (var checkCommand = new NpgsqlCommand("SELECT EXISTS (SELECT 1 FROM \"Vehicles\" WHERE \"VehicleNumber\" = @NewVehicleNumber AND \"VehicleID\" <> @VehicleID)", connection))
-                            {
-                                checkCommand.Parameters.AddWithValue("@NewVehicleNumber", newVehicleNumber);
-                                checkCommand.Parameters.AddWithValue("@VehicleID", vehicleID);
-                                bool exists = (bool)checkCommand.ExecuteScalar();
-                                if (exists)
-                                {
-                                    gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                                    return gvarResponse;
+            gvarResponse.DicOfDic["Tags"]["STS"] = "1";
+            _logger.Information($"Successfully updated vehicle with ID: {vehicleId}");
                                 }
-                            }
-
-                            value = newVehicleNumber;
-                        }
-
-                        updateParts.Add($"\"{detail.Key}\" = {paramName}");
-                        parameters[paramName] = value;
-                    }
-                }
-
-                // Only proceed if there are fields to update
-                if (updateParts.Count > 0)
+        catch (Exception ex)
                 {
-                    string sql = $"UPDATE \"Vehicles\" SET {string.Join(", ", updateParts)} WHERE \"VehicleID\" = @VehicleID";
-                    using (var command = new NpgsqlCommand(sql, connection))
-                    {
-                        foreach (var param in parameters)
-                        {
-                            command.Parameters.AddWithValue(param.Key, param.Value);
-                        }
-                        command.Parameters.AddWithValue("@VehicleID", vehicleID);
-
-                        int rowsAffected = command.ExecuteNonQuery();
-                        if (rowsAffected == 0)
-                        {
+            _logger.Error(ex, "Exception occurred while updating vehicle");
                             gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-                            return gvarResponse;
                         }
-                    }
-                }
 
-                gvarResponse.DicOfDic["Tags"]["STS"] = "1";
                 return gvarResponse;
             }
-        }
-        catch (Exception)
-        {
-            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-            return gvarResponse;
-        }
-    }
 
     public GVAR GetVehicleDetails(long vehicleID)
     {
@@ -483,5 +414,38 @@ public class VehicleService : IVehicleService
             return false;
         }
         return true;
+    }
+
+    private async Task<(bool IsSuccess, Dictionary<string, object> UpdateData)> GetUpdateDataAsync(ConcurrentDictionary<string, string> vehicleDetails, long vehicleId, GVAR gvarResponse, CancellationToken cancellationToken)
+    {
+        var updateData = new Dictionary<string, object>();
+
+        foreach (var detail in vehicleDetails)
+        {
+            if (detail.Key != "VehicleID" && detail.Value != null)
+            {
+                object value = detail.Value;
+
+                if (detail.Key == "VehicleNumber" && long.TryParse(detail.Value, out long newVehicleNumber))
+                {
+                    if (!await IsVehicleNumberUnique(newVehicleNumber, vehicleId, cancellationToken))
+                    {
+                        gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+                        _logger.Warning($"Vehicle with number {newVehicleNumber} already exists");
+                        return (false, new Dictionary<string, object>());
+                    }
+                    value = newVehicleNumber;
+                }
+
+                updateData.Add(detail.Key, value);
+            }
+        }
+
+        return (true, updateData);
+    }
+
+    private async Task<bool> IsVehicleNumberUnique(long newVehicleNumber, long vehicleId, CancellationToken cancellationToken)
+    {
+        return !await _vehicleRepository.IsVehicleNumberExistsAsync(newVehicleNumber, vehicleId, cancellationToken);
     }
 }
