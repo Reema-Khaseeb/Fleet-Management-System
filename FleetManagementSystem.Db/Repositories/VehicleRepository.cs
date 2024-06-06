@@ -1,6 +1,7 @@
 ﻿using FleetManagementSystem.Db.Interfaces;
 using Npgsql;
 using Serilog;
+using static FleetManagementSystem.Common.DatabaseConstants;
 
 namespace FleetManagementSystem.Db.Repositories;
 
@@ -21,10 +22,10 @@ public class VehicleRepository : IVehicleRepository
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         try
         {
-            var query = "INSERT INTO \"Vehicles\" (\"VehicleNumber\", \"VehicleType\") VALUES (@VehicleNumber, @VehicleType)";
+            var query = $"INSERT INTO \"{Tables.Vehicles}\" (\"{VehiclesFields.VehicleNumber}\", \"{VehiclesFields.VehicleType}\") VALUES (@{VehiclesFields.VehicleNumber}, @{VehiclesFields.VehicleType})";
             await using var command = new NpgsqlCommand(query, connection, transaction);
-            command.Parameters.AddWithValue("@VehicleNumber", vehicleNumber);
-            command.Parameters.AddWithValue("@VehicleType", vehicleType);
+            command.Parameters.AddWithValue($"@{VehiclesFields.VehicleNumber}", vehicleNumber);
+            command.Parameters.AddWithValue($"@{VehiclesFields.VehicleType}", vehicleType);
             await command.ExecuteNonQueryAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
@@ -44,9 +45,9 @@ public class VehicleRepository : IVehicleRepository
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         try
         {
-            var query = "DELETE FROM \"Vehicles\" WHERE \"VehicleID\" = @VehicleID";
+            var query = $"DELETE FROM \"{Tables.Vehicles}\" WHERE \"{VehiclesFields.VehicleID}\" = @{VehiclesFields.VehicleID}";
             await using var command = new NpgsqlCommand(query, connection, transaction);
-            command.Parameters.AddWithValue("@VehicleID", vehicleId);
+            command.Parameters.AddWithValue($"@{VehiclesFields.VehicleID}", vehicleId);
             int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
 
             if (rowsAffected == 0)
@@ -66,23 +67,27 @@ public class VehicleRepository : IVehicleRepository
         }
     }
 
-    public async Task UpdateVehicleAsync(long vehicleId,
-        Dictionary<string, object> updateData, CancellationToken cancellationToken)
+    public async Task UpdateVehicleAsync(long vehicleId, Dictionary<string, object> updateData, CancellationToken cancellationToken)
     {
         await using var connection = await _databaseConnection.GetConnectionAsync(cancellationToken);
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
         try
         {
-            var updateParts = updateData.Select(kv => $"\"{kv.Key}\" = @{kv.Key}").ToList();
-            string updateQuery = $"UPDATE \"Vehicles\" SET {string.Join(", ", updateParts)} WHERE \"VehicleID\" = @VehicleID";
+            var updateParts = new List<string>();
+            foreach (var key in updateData.Keys)
+            {
+                updateParts.Add($"\"{key}\" = @{key}");
+            }
+
+            string updateQuery = $"UPDATE \"{Tables.Vehicles}\" SET {string.Join(", ", updateParts)} WHERE \"{VehiclesFields.VehicleID}\" = @{VehiclesFields.VehicleID}";
 
             await using var command = new NpgsqlCommand(updateQuery, connection, transaction);
             foreach (var param in updateData)
             {
                 command.Parameters.AddWithValue("@" + param.Key, param.Value);
             }
-            command.Parameters.AddWithValue("@VehicleID", vehicleId);
+            command.Parameters.AddWithValue($"@{VehiclesFields.VehicleID}", vehicleId);
 
             int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
             if (rowsAffected == 0)
@@ -101,15 +106,14 @@ public class VehicleRepository : IVehicleRepository
         }
     }
 
-    public async Task<bool> IsVehicleNumberExistsAsync(long vehicleNumber,
-        long excludedVehicleId, CancellationToken cancellationToken)
+    public async Task<bool> IsVehicleNumberExistsAsync(long vehicleNumber, long excludedVehicleId, CancellationToken cancellationToken)
     {
         await using var connection = await _databaseConnection.GetConnectionAsync(cancellationToken);
-        var query = "SELECT EXISTS (SELECT 1 FROM \"Vehicles\" WHERE \"VehicleNumber\" = @VehicleNumber AND \"VehicleID\" <> @VehicleID)";
+        var query = $"SELECT EXISTS (SELECT 1 FROM \"{Tables.Vehicles}\" WHERE \"{VehiclesFields.VehicleNumber}\" = @{VehiclesFields.VehicleNumber} AND \"{VehiclesFields.VehicleID}\" <> @{VehiclesFields.VehicleID})";
 
         await using var command = new NpgsqlCommand(query, connection);
-        command.Parameters.AddWithValue("@VehicleNumber", vehicleNumber);
-        command.Parameters.AddWithValue("@VehicleID", excludedVehicleId);
+        command.Parameters.AddWithValue($"@{VehiclesFields.VehicleNumber}", vehicleNumber);
+        command.Parameters.AddWithValue($"@{VehiclesFields.VehicleID}", excludedVehicleId);
 
         return (bool)await command.ExecuteScalarAsync(cancellationToken);
     }

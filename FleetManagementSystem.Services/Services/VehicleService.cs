@@ -5,6 +5,7 @@ using Npgsql;
 using System.Collections.Concurrent;
 using System.Data;
 using Serilog;
+using static FleetManagementSystem.Common.DatabaseConstants;
 
 namespace FleetManagementSystem.Services;
 
@@ -39,16 +40,16 @@ public class VehicleService : IVehicleService
                 return gvarResponse;
             }
 
-            var vehicleType = vehicleDetails["VehicleType"];
+            var vehicleType = vehicleDetails[VehiclesFields.VehicleType];
             await _vehicleRepository.AddVehicleAsync(vehicleNumber, vehicleType, cancellationToken);
 
-            gvarResponse.DicOfDic["Tags"]["STS"] = "1";
+            GVARUtility.SetStatus(gvarResponse, "1");
             _logger.Information($"Successfully added vehicle with number: {vehicleNumber}");
         }
         catch (Exception ex)
         {
             _logger.Error(ex, "Exception occurred while adding vehicle");
-            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            GVARUtility.SetStatus(gvarResponse, "0");
         }
 
             return gvarResponse;
@@ -72,13 +73,13 @@ public class VehicleService : IVehicleService
 
             await _vehicleRepository.DeleteVehicleAsync(vehicleId, cancellationToken);
 
-            gvarResponse.DicOfDic["Tags"]["STS"] = "1";
+            GVARUtility.SetStatus(gvarResponse, "1");
             _logger.Information($"Successfully deleted vehicle with ID: {vehicleId}");
         }
         catch (Exception ex)
         {
             _logger.Error(ex, "Exception occurred while deleting vehicle");
-            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            GVARUtility.SetStatus(gvarResponse, "0");
         }
 
             return gvarResponse;
@@ -108,13 +109,13 @@ public class VehicleService : IVehicleService
 
             await _vehicleRepository.UpdateVehicleAsync(vehicleId, updateResult.UpdateData, cancellationToken);
 
-            gvarResponse.DicOfDic["Tags"]["STS"] = "1";
+            GVARUtility.SetStatus(gvarResponse, "1");
             _logger.Information($"Successfully updated vehicle with ID: {vehicleId}");
                                 }
         catch (Exception ex)
                 {
             _logger.Error(ex, "Exception occurred while updating vehicle");
-                            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            GVARUtility.SetStatus(gvarResponse, "0");
                         }
 
                 return gvarResponse;
@@ -383,9 +384,9 @@ public class VehicleService : IVehicleService
     private bool TryGetVehicleDetails(GVAR gvar, GVAR gvarResponse, 
         out ConcurrentDictionary<string, string> vehicleDetails)
     {
-        if (!gvar.DicOfDic.TryGetValue("Tags", out vehicleDetails))
+        if (!gvar.DicOfDic.TryGetValue(GVARKeys.Tags, out vehicleDetails))
         {
-            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            GVARUtility.SetStatus(gvarResponse, "0");
             _logger.Error("Failed to get vehicle details");
             return false;
         }
@@ -395,42 +396,46 @@ public class VehicleService : IVehicleService
     private bool TryGetVehicleNumber(ConcurrentDictionary<string, string> vehicleDetails, 
         out long vehicleNumber, GVAR gvarResponse)
     {
-        if (!long.TryParse(vehicleDetails["VehicleNumber"], out vehicleNumber))
+        if (!long.TryParse(vehicleDetails[VehiclesFields.VehicleNumber], out vehicleNumber))
         {
-            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
-            _logger.Error($"Failed to parse vehicle number: {vehicleDetails["VehicleNumber"]}");
+            GVARUtility.SetStatus(gvarResponse, "0");
+            _logger.Error($"Failed to parse vehicle number: {vehicleDetails[VehiclesFields.VehicleNumber]}");
             return false;
         }
         return true;
         }
 
-    private bool TryGetVehicleId(ConcurrentDictionary<string, string> vehicleDetails, out long vehicleId, GVAR gvarResponse)
+    private bool TryGetVehicleId(ConcurrentDictionary<string, string> vehicleDetails,
+        out long vehicleId, GVAR gvarResponse)
     {
         vehicleId = 0;
-        if (!vehicleDetails.TryGetValue("VehicleID", out string vehicleIdString) || !long.TryParse(vehicleIdString, out vehicleId))
+        if (!vehicleDetails.TryGetValue(VehiclesFields.VehicleID, out string vehicleIdString) 
+            || !long.TryParse(vehicleIdString, out vehicleId))
         {
-            gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+            GVARUtility.SetStatus(gvarResponse, "0");
             _logger.Error($"Failed to parse vehicle ID: {vehicleIdString}");
             return false;
         }
         return true;
     }
 
-    private async Task<(bool IsSuccess, Dictionary<string, object> UpdateData)> GetUpdateDataAsync(ConcurrentDictionary<string, string> vehicleDetails, long vehicleId, GVAR gvarResponse, CancellationToken cancellationToken)
+    private async Task<(bool IsSuccess, Dictionary<string, object> UpdateData)> GetUpdateDataAsync(
+        ConcurrentDictionary<string, string> vehicleDetails,
+        long vehicleId, GVAR gvarResponse, CancellationToken cancellationToken)
     {
         var updateData = new Dictionary<string, object>();
 
         foreach (var detail in vehicleDetails)
         {
-            if (detail.Key != "VehicleID" && detail.Value != null)
+            if (detail.Key != VehiclesFields.VehicleID && detail.Value != null)
             {
                 object value = detail.Value;
 
-                if (detail.Key == "VehicleNumber" && long.TryParse(detail.Value, out long newVehicleNumber))
+                if (detail.Key == VehiclesFields.VehicleNumber && long.TryParse(detail.Value, out long newVehicleNumber))
                 {
                     if (!await IsVehicleNumberUnique(newVehicleNumber, vehicleId, cancellationToken))
                     {
-                        gvarResponse.DicOfDic["Tags"]["STS"] = "0";
+                        GVARUtility.SetStatus(gvarResponse, "0");
                         _logger.Warning($"Vehicle with number {newVehicleNumber} already exists");
                         return (false, new Dictionary<string, object>());
                     }
